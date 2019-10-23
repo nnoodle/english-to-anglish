@@ -1,5 +1,4 @@
 body {
-  margin: 3rem;
   font-family: CMU Sans Serif , Computer Modern Sans, Source Sans Pro, sans-serif;
 }
 
@@ -39,4 +38,10 @@ mark {
 
 ol {
   list-style: upper-roman outside; /* :^) */
+}
+
+@media (min-width: 40.0rem) {
+  body {
+    margin: 3rem;
+  }
 }
