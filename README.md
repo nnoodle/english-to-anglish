@@ -1,7 +1,7 @@
 # English → Anglish Text Converter
 
-Simple English to "Anglish" text converter, using [The Anglish
-Moot](https://anglish.fandom.com/) for words.
+Dumb English to "Anglish" text converter, using [The Anglish
+Moot](https://anglish.fandom.com/) as the source for words.
 
 ## Wordbook License
 

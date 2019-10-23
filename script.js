@@ -9,7 +9,6 @@ fetch('./wordbook.json')
       shouldSort: true,
       includeMatches: true,
       threshhold: 0.7,
-      // maxPatternLength: 40,
       minMatchCharLength: 1,
       keys: [
         { name:'english', weight: 0.7 },

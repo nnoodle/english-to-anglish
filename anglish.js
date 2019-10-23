@@ -1,5 +1,6 @@
 
 function removeParens(str) {
+  if (!str) return ''
   return str.replace(/\)/g, '),').match(/\\?(\n|.)|^$/g).reduce((s, c) => {
       if (c === '(')
         s.p++
@@ -14,8 +15,8 @@ function removeParens(str) {
 function clean(s) {
   if (s) {
     return removeParens(s)
-    // take out parens, accidental tags, and bindings of classes, e.g. 'n: bid'
-      .replace(/(?:\W|^).*?:|[()]|<.*?>/g, '')
+    // take out parens, word classes, other random accidents
+      .replace(/(?:^|\W).*?:|[(?)]|<.*?>|\/.*?\//g, ',')
     // use ',' as sep, & take out all whitespace between seps.
       .replace(/\s*[\n;,/.]\s*/g, ',')
       .split(',').map(s => s.trim()).filter(s => s)
@@ -66,14 +67,33 @@ async function fetchOneList(rune) {
 function fmtList(lst) {
   const out = {}
   for (let w of lst) {
-    const { english, ...an } = w
+    let { english, ...an } = w
+    english = removeParens(english).replace(/,/g, '').trim()
+    // for (let en of english) {
     if (out[english] === undefined)
       out[english] = []
     out[english] = out[english]
       .concat(clean(an.attested))
       .concat(clean(an.unattested))
+    // }
   }
   return out
+}
+
+function prepostfixList(lst) {
+  let p = {
+    re: {},
+    ost: {}
+  }
+  for (const i in lst) {
+    if (i.length > 5) { // ignore short suffixes
+      if (i[0] === '-')
+        p.ost[i] = lst[i]
+      if (i[i.length-1] === '-')
+        p.re[i] = lst[i]
+    }
+  }
+  return p
 }
 
 async function fetchLists(log = console.log) {
@@ -86,9 +106,31 @@ async function fetchLists(log = console.log) {
   return lst.flat()
 }
 
+const randElem = arr => arr[Math.floor(Math.random() * arr.length)]
+
+function fitsuffix(w, p) {
+  const build = (fix, beg, end) => Object.keys(p[fix]).map(f => f.slice(beg, end)).join('|')
+  const attach = (w, infix, suffix) => suffix[0] === '-'
+        ? w + infix + suffix.slice(1)
+        : suffix.slice(0,-1) + infix + w
+
+  const re = (new RegExp('^(?:('+build('re', 0, -1)+')(-)?)?(.*?)(?:(-)?('+build('ost', 1)+'))?$'))
+  let matches = re.exec(w)
+
+  matches[2] = matches[2] || ''
+  matches[3] = matches[3] || ''
+  matches[4] = matches[4] || ''
+
+  if (p.ost['-'+matches[5]])
+    return attach(matches[3], matches[4], randElem(p.ost['-'+matches[5]]))
+  if (p.re[matches[1]+'-'])
+    return attach(matches[3], matches[2], randElem(p.re[matches[1]+'-']))
+  return null
+}
+
 function fitWord(w, l) {
-  const capitalized = /[A-Z]/.test(w)
-  const randElem = arr => arr[Math.floor(Math.random() * arr.length)]
+  const capitalized = /^[A-Z]/.test(w)
+
   const upcase = s => (capitalized && s) ? s[0].toUpperCase() + s.slice(1) : s
   const pick = e => e && randElem(e)
   const ty = (r, e = '') => {
@@ -101,13 +143,13 @@ function fitWord(w, l) {
     return pick(l[w])
   w = w.toLowerCase()
   return upcase(pick(l[w])
-  // try inflections out
     || ty(/(.*?)(ion|ly|ing|es|ed|en|s|d|n)$/)
-    || ty(/(.*?)(ing|ly|es|ed|en)$/,'e'))
+    || ty(/(.*?)(ing|ly|es|ed|en)$/,'e')
+    || fitsuffix(w, prepostfixList(l)))
 }
 
 function eng2ang(word, lst) {
-  const w = (/(\W*)(\w+)(\W*)/).exec(word)
+  const w = (/(\W*)(\w+)(.*)/).exec(word)
   if (!w)
     return word
   else {
@@ -120,4 +162,5 @@ function anglify(p, lst) {
   return p.split('\n')
     .map(s => s.split(' ').map(w => eng2ang(w, lst)).join(' '))
     .join('\n')
+    .replace(/(\w)(?:- | -)(\w)/g, '$1$2') // ere- blah/blah -lore
 }
