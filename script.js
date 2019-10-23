@@ -72,13 +72,28 @@ var app = new Vue({
     }
   },
   methods: {
+    escape: function(str) {
+      const esc = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '"': '&quot;',
+        "'": '&#39;'
+      }
+
+      const re = /[&<"']/g
+      if (str && re.test(str))
+        return str.replace(re, chr => esc[chr])
+      return str
+    },
     markup: function(key, item, matches) {
       const match = matches.find(m => m.key === key)
       if (!match)
-        return item[key]
+        return this.escape(item[key])
       const ind = match.indices[0]
       let offset = 0
-      return match.indices.reduce((str, ind) => mark(str, ind[0], ind[1], offset++), match.value)
+      return this.escape(match.indices
+                    .reduce((str, ind) => mark(str, ind[0], ind[1], offset++), match.value))
+        .replace(/&lt;(\/)?mark/g, '<$1mark')
     },
   },
 })

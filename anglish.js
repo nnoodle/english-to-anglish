@@ -1,10 +1,21 @@
 
+function removeParens(str) {
+  return str.replace(/\)/g, '),').match(/\\?(\n|.)|^$/g).reduce((s, c) => {
+      if (c === '(')
+        s.p++
+      if (!s.p)
+        s.str += c
+      if (c === ')')
+        s.p = s.p-1 || 0
+      return s
+    }, { p: 0, str: '' }).str
+}
+
 function clean(s) {
   if (s) {
-    return s
+    return removeParens(s)
     // take out parens, accidental tags, and bindings of classes, e.g. 'n: bid'
-      .replace(/\((?:.|\n)*?\)|<.*?>/g, ',')
-      .replace(/(?:\W|^).*?:/g, '')
+      .replace(/(?:\W|^).*?:|[()]|<.*?>/g, '')
     // use ',' as sep, & take out all whitespace between seps.
       .replace(/\s*[\n;,/.]\s*/g, ',')
       .split(',').map(s => s.trim()).filter(s => s)
@@ -92,7 +103,7 @@ function fitWord(w, l) {
   return upcase(pick(l[w])
   // try inflections out
     || ty(/(.*?)(ion|ly|ing|es|ed|en|s|d|n)$/)
-    || ty(/(.*?)(ing|es|ed|en)$/,'e'))
+    || ty(/(.*?)(ing|ly|es|ed|en)$/,'e'))
 }
 
 function eng2ang(word, lst) {

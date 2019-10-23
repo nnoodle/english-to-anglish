@@ -10,6 +10,7 @@ li {
 textarea {
   font-family: CMU Sans Serif, Computer Modern Sans, Source Sans Pro, sans-serif;
   width: 100%;
+  height: 10rem;
   box-sizing: border-box;
 }
 
