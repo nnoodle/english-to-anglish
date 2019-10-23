@@ -1,29 +1,4 @@
 
-function removeParens(str) {
-  if (!str) return ''
-  return str.replace(/\)/g, '),').match(/\\?(\n|.)|^$/g).reduce((s, c) => {
-      if (c === '(')
-        s.p++
-      if (!s.p)
-        s.str += c
-      if (c === ')')
-        s.p = s.p-1 || 0
-      return s
-    }, { p: 0, str: '' }).str
-}
-
-function clean(s) {
-  if (s) {
-    return removeParens(s)
-    // take out parens, word classes, other random accidents
-      .replace(/(?:^|\W).*?:|[(?)]|<.*?>|\/.*?\//g, ',')
-    // use ',' as sep, & take out all whitespace between seps.
-      .replace(/\s*[\n;,/.]\s*/g, ',')
-      .split(',').map(s => s.trim()).filter(s => s)
-  } else
-    return []
-}
-
 function parseAnglishTable(tbl) {
   const getel = (e, n) => {
     try {
@@ -64,6 +39,41 @@ async function fetchOneList(rune) {
   }
 }
 
+async function fetchLists(log = console.log) {
+  let lst = []
+  for (let i of 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('')) {
+    lst.push(await fetchOneList(i))
+    if (log)
+      log('Finished with', i)
+  }
+  return lst.flat()
+}
+
+function removeParens(str) {
+  if (!str) return ''
+  return str.replace(/\)/g, '),').match(/\\?(\n|.)|^$/g).reduce((s, c) => {
+      if (c === '(')
+        s.p++
+      if (!s.p)
+        s.str += c
+      if (c === ')')
+        s.p = s.p-1 || 0
+      return s
+    }, { p: 0, str: '' }).str
+}
+
+function clean(s) {
+  if (s) {
+    return removeParens(s)
+    // take out parens, word classes, other random accidents
+      .replace(/(?:^|\W).*?:|[(?)]|<.*?>|\/.*?\//g, ',')
+    // use ',' as sep, & take out all whitespace between seps.
+      .replace(/\s*[\n;,/.]\s*/g, ',')
+      .split(',').map(s => s.trim()).filter(s => s)
+  } else
+    return []
+}
+
 function fmtList(lst) {
   const out = {}
   for (let w of lst) {
@@ -94,16 +104,6 @@ function prepostfixList(lst) {
     }
   }
   return p
-}
-
-async function fetchLists(log = console.log) {
-  let lst = []
-  for (let i of 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('')) {
-    lst.push(await fetchOneList(i))
-    if (log)
-      log('Finished with', i)
-  }
-  return lst.flat()
 }
 
 const randElem = arr => arr[Math.floor(Math.random() * arr.length)]
