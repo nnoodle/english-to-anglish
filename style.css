@@ -1,0 +1,41 @@
+body {
+  margin: 3rem;
+  font-family: CMU Sans Serif , Computer Modern Sans, Source Sans Pro, sans-serif;
+}
+
+li {
+  padding: 0.2rem;
+}
+
+textarea {
+  font-family: CMU Sans Serif, Computer Modern Sans, Source Sans Pro, sans-serif;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+output {
+  font-family: CMU Serif, Computer Modern Serif, Latin Modern Roman, serif;
+  font-size: 1.1em;
+  margin: 1rem;
+  white-space: pre-line;
+}
+
+footer {
+  padding-top: 2rem;
+}
+
+.typewriter {
+  font-family: Computer Modern Typewriter, 'CMU Typewriter Text', Courior;
+}
+
+.newline {
+  white-space: pre-line;
+}
+
+mark {
+  background-color: yellow;
+}
+
+ol {
+  list-style: upper-roman outside; /* :^) */
+}

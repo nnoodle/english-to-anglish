@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="manifest" href="manifest.json">
+    <title>English → Anglish</title>
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="favicon.ico">
+
+    <link rel="stylesheet" type="text/css" href="https://cdn.rawgit.com/dreampulse/computer-modern-web-font/master/fonts.css">
+    <link rel="stylesheet" href="style.css">
+
+    <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+    <!-- <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script> -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/3.2.1/fuse.min.js"></script>
+  </head>
+  <body>
+    <noscript>this website requires javascript to function.</noscript>
+    <div id="app">
+      <h1>English → Anglish</h1>
+      <h3>Lookup Word</h3>
+      <input type="text" v-model="input_search" placeholder="e.g. village, lingustics, just">
+      <input type="checkbox" v-model="highlightp" name="highlightp">
+      <label for="highlightp"><small>Highlight</small></label>
+      <ol>
+        <li v-for="{ item, matches } in output_search">
+          <span class="typewriter" v-html="markup('english', item, matches)"></span>
+          <small>[{{ item.word_class }}]</small><br>
+          <span class="newline" v-html="item.attested ? markup('attested', item, matches) : ''">
+          </span>{{ (item.attested && item.unattested) ? ',' : '' }}
+          <i class="newline" title="unattested"
+             v-html="item.unattested ? markup('unattested', item, matches) : ''"></i>
+        </li>
+      </ol>
+      <hr>
+      <h3><abbr title="To turn; change; convert">Wend</abbr> Text</h3>
+      <textarea v-model="input_text"></textarea>
+      <output v-if="output_text">
+        {{ output_text }}</output>
+      <footer>
+        <center>
+          <abbr title="Dictionary">Wordbook</abbr> taken from
+          <a href="https://anglish.fandom.com">The Anglish Moot</a>
+        </center>
+      </footer>
+    </div>
+    <script src="anglish.js"></script>
+    <script src="script.js"></script>
+  </body>
+</html>
