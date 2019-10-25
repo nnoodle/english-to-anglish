@@ -66,7 +66,7 @@ function clean(s) {
   if (s) {
     return removeParens(s)
     // take out parens, word classes, other random accidents
-      .replace(/(?:^|\W).*?:|[(?)]|<.*?>|\/.*?\/|\[.*?\]/g, ',')
+      .replace(/(?:^|\W).*?:|[(?)]|<.*?>|\/.*?\/|\[.*?\]|".*?"|__+/g, ',')
     // use ',' as sep, & take out all whitespace between seps.
       .replace(/\s*[\n;,/.]\s*/g, ',')
       .split(',').map(s => s.trim()).filter(s => s)

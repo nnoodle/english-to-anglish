@@ -21,7 +21,21 @@ fetch('./wordbook.json')
 
 const tr = str => anglify(str, anglish.list)
 
-function mark(str, beg, end, offset = 0) {
+function escapeHTML(str) {
+  const esc = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '"': '&quot;',
+    "'": '&#39;'
+  }
+
+  const re = /[&<"']/g
+  if (str && re.test(str))
+    return str.replace(re, chr => esc[chr])
+  return str
+}
+
+function mark(str, [beg, end], offset = 0) {
   offset = offset*13 // 13 === '<mark></mark>'.length
   beg += offset
   end += offset+1
@@ -30,19 +44,39 @@ function mark(str, beg, end, offset = 0) {
     +str.slice(end)
 }
 
+function ligatures(str) {
+  const simple = {
+    // good fonts already do the common ligatures
+    'AE': 'Æ',
+    'Ae': 'Æ',
+    'ae': 'æ',
+    'OE': 'Œ',
+    'Oe': 'Œ',
+    'oe': 'œ',
+    'st': 'ﬆ',
+    'ſt': 'ﬅ',
+  }
+
+  return str
+  // no lookaround in firefox yet
+    .replace(/(?:^|[^ſSs])s\B/g, x => (x.length === 2 ? x[0] : '')+'ſ')
+    .replace(/th\B/gi, th => th[0] === 'T' ? 'Þ' : 'þ')
+    .replace(new RegExp(Object.keys(simple).join('|'), 'g'), s => simple[s])
+}
+
 var app = new Vue({
   el: '#app',
   data: {
     highlightp: true,
-    search_results: [],
+    ligaturep: false,
     pagination: 1,
+    search_results: [],
     input_text: '',
     input_search: '',
   },
   computed: {
     output_text: function() {
-      const lig = {
-        // TeX-style quotes/dashes
+      const quote = {
         '``': '“',
         "''": '”',
         '`': '‘',
@@ -51,16 +85,10 @@ var app = new Vue({
         '>>': '»',
         '---': '—',
         '--': '–',
-        // good fonts do the common ligatures already.
-        'AE': 'Æ',
-        'Ae': 'Æ',
-        'ae': 'æ',
-        'OE': 'Œ',
-        'Oe': 'Œ',
-        'oe': 'œ',
       }
-      return tr(this.input_text).trim()
-        .replace(new RegExp(Object.keys(lig).join('|'), 'g'), s => lig[s]||s)
+      const out = tr(this.input_text).trim()
+            .replace(new RegExp(Object.keys(quote).join('|'), 'g'), s => quote[s])
+      return this.ligaturep ? ligatures(out) : out
     },
     output_search: function() {
       return this.search_results.slice(0, this.pagination * 10)
@@ -85,34 +113,20 @@ var app = new Vue({
     }
   },
   methods: {
-    escape: function(str) {
-      const esc = {
-        '&': '&amp;',
-        '<': '&lt;',
-        '"': '&quot;',
-        "'": '&#39;'
-      }
-
-      const re = /[&<"']/g
-      if (str && re.test(str))
-        return str.replace(re, chr => esc[chr])
-      return str
-    },
     markup: function(key, item, matches) {
       const match = matches.find(m => m.key === key)
       if (!match)
-        return this.escape(item[key])
+        return escapeHTML(item[key])
       const ind = match.indices[0]
       let offset = 0
-      return this.escape(match.indices
-                    .reduce((str, ind) => mark(str, ind[0], ind[1], offset++), match.value))
+      return escapeHTML(match.indices
+                    .reduce((str, ind) => mark(str, ind, offset++), match.value))
         .replace(/&lt;(\/)?mark/g, '<$1mark')
     },
     addSeparator: function(a, b) {
       if (a && b)
         return a+b.includes('\n') ? '\n' : ','
-      else
-        return ''
+      return ''
     },
   },
 })

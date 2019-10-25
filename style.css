@@ -1,5 +1,5 @@
 body {
-  font-family: CMU Sans Serif, Computer Modern Sans, Source Sans Pro, sans-serif;
+  font-family: CMU Sans Serif, Computer Modern Sans, Latin Modern Sans, sans-serif;
 }
 
 li {
@@ -14,7 +14,7 @@ textarea {
 }
 
 output {
-  font-family: EB Garamond, CMU Serif, Computer Modern Serif, Latin Modern Roman, serif;
+  font-family: Garamond, EB Garamond, Baskerville, Baskervald ADF Std, serif;
   font-size: 1.1em;
   margin: 1rem;
   white-space: pre-line;

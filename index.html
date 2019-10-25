@@ -8,12 +8,13 @@
     <meta name="description" content="Dumb English to Anglish converter">
     <meta name="author" content="">
 
-    <link rel="stylesheet" type="text/css" href="https://cdn.rawgit.com/dreampulse/computer-modern-web-font/master/fonts.css">
+    <link href="https://fonts.googleapis.com/css?family=EB+Garamond&display=swap" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/gh/dreampulse/computer-modern-web-font@master/fonts.css">
     <link rel="stylesheet" href="style.css">
 
     <script src="https://cdn.jsdelivr.net/npm/vue"></script>
     <!-- <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script> -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/3.2.1/fuse.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fuse.js@3.4.5/dist/fuse.min.js"></script>
   </head>
   <body>
     <noscript>this website requires javascript to function.</noscript>
@@ -39,6 +40,8 @@
       </ol>
       <hr>
       <h3><abbr title="To turn; change; convert">Wend</abbr> Text</h3>
+      <input type="checkbox" v-model="ligaturep" name="ligaturep">
+      <label name="ligaturep"><small>Ligatures</small></label>
       <textarea v-model="input_text"></textarea>
       <output v-if="output_text">
         {{ output_text }}</output>
