@@ -28,10 +28,14 @@
           <span class="typewriter" v-html="markup('english', item, matches)"></span>
           <small>[{{ item.word_class }}]</small><br>
           <span class="newline" v-html="item.attested ? markup('attested', item, matches) : ''">
-          </span>{{ (item.attested && item.unattested) ? ',' : '' }}
+          </span><span class="newline">{{ addSeparator(item.attested, item.unattested) }}</span>
           <i class="newline" title="unattested"
              v-html="item.unattested ? markup('unattested', item, matches) : ''"></i>
         </li>
+        <button v-if="search_results.length > output_search.length"
+                class="btn-dotted" v-on:click="pagination++">
+          Show more
+        </button>
       </ol>
       <hr>
       <h3><abbr title="To turn; change; convert">Wend</abbr> Text</h3>

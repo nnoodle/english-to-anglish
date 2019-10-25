@@ -66,7 +66,7 @@ function clean(s) {
   if (s) {
     return removeParens(s)
     // take out parens, word classes, other random accidents
-      .replace(/(?:^|\W).*?:|[(?)]|<.*?>|\/.*?\//g, ',')
+      .replace(/(?:^|\W).*?:|[(?)]|<.*?>|\/.*?\/|\[.*?\]/g, ',')
     // use ',' as sep, & take out all whitespace between seps.
       .replace(/\s*[\n;,/.]\s*/g, ',')
       .split(',').map(s => s.trim()).filter(s => s)
@@ -96,7 +96,7 @@ function prepostfixList(lst) {
     ost: {}
   }
   for (const i in lst) {
-    if (i.length > 5) { // ignore short suffixes
+    if (i.length > 4) { // ignore short suffixes
       if (i[0] === '-')
         p.ost[i] = lst[i]
       if (i[i.length-1] === '-')
@@ -141,11 +141,15 @@ function fitWord(w, l) {
   }
   if (pick(l[w]))
     return pick(l[w])
+
   w = w.toLowerCase()
-  return upcase(pick(l[w])
-    || ty(/(.*?)(ion|ly|ing|es|ed|en|s|d|n)$/)
-    || ty(/(.*?)(ing|ly|es|ed|en)$/,'e')
-    || fitsuffix(w, prepostfixList(l)))
+  return upcase(
+    pick(l[w])
+      || ty(/(.*?)((?:it)?y|[sdnr])$/)
+      || ty(/(.*?)(ly|ing|e(?:st?|d|n|rs?))$/)
+      || ty(/(.*?)(ly|ing|e(?:st?|d|n|rs?))$/,'e')
+      || ty(/(.*?)(ie[srd])$/,'y')
+      || fitsuffix(w, prepostfixList(l)))
 }
 
 function eng2ang(word, lst) {
