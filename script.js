@@ -98,7 +98,7 @@ var app = new Vue({
     input_search: function() {
       this.pagination = 1
       if (!this.input_search)
-        this.output_search = []
+        this.search_results = []
       else if (anglish.index) {
         const now = this.input_search
         setTimeout(() => {
