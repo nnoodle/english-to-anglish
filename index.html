@@ -42,6 +42,9 @@
       <h3><abbr title="To turn; change; convert">Wend</abbr> Text</h3>
       <input type="checkbox" v-model="ligaturep" name="ligaturep">
       <label name="ligaturep"><small>Ligatures</small></label>
+      <br>
+      <input type="checkbox" v-model="unattestedp" name="unattestedp">
+      <label name="unattestedp"><small>Unattested</small></label>
       <textarea v-model="input_text"></textarea>
       <output v-if="output_text">
         {{ output_text }}</output>

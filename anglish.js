@@ -10,7 +10,7 @@ function parseAnglishTable(tbl) {
         console.error(err)
         throw err
       }
-      return null
+      return false
     }
   }
   try {
@@ -74,17 +74,18 @@ function clean(s) {
     return []
 }
 
-function fmtList(lst) {
+function formatList(lst) {
   const out = {}
   for (let w of lst) {
     let { english, ...an } = w
     english = removeParens(english).replace(/,/g, '').trim()
     // for (let en of english) {
     if (out[english] === undefined)
-      out[english] = []
-    out[english] = out[english]
-      .concat(clean(an.attested))
-      .concat(clean(an.unattested))
+      out[english] = { attested:[], unattested:[] }
+    out[english] = {
+      attested: out[english].attested.concat(clean(an.attested)),
+      unattested: out[english].unattested.concat(clean(an.unattested))
+    }
     // }
   }
   return out
@@ -108,11 +109,15 @@ function prepostfixList(lst) {
 
 const randElem = arr => arr[Math.floor(Math.random() * arr.length)]
 
-function fitsuffix(w, p) {
+function fitsuffix(w, p, unattestedp) {
   const build = (fix, beg, end) => Object.keys(p[fix]).map(f => f.slice(beg, end)).join('|')
   const attach = (w, infix, suffix) => suffix[0] === '-'
         ? w + infix + suffix.slice(1)
         : suffix.slice(0,-1) + infix + w
+  const pick = e => {
+    if (!e || (unattestedp && !e.attested)) return false
+    return randElem(unattestedp ? e.attested.concat(e.unattested) : e.attested)
+  }
 
   const re = (new RegExp('^(?:('+build('re', 0, -1)+')(-)?)?(.*?)(?:(-)?('+build('ost', 1)+'))?$'))
   let matches = re.exec(w)
@@ -121,19 +126,22 @@ function fitsuffix(w, p) {
   matches[3] = matches[3] || ''
   matches[4] = matches[4] || ''
 
-  if (p.ost['-'+matches[5]])
-    return attach(matches[3], matches[4], randElem(p.ost['-'+matches[5]]))
-  if (p.re[matches[1]+'-'])
-    return attach(matches[3], matches[2], randElem(p.re[matches[1]+'-']))
-  return null
+  if (pick(p.ost['-'+matches[5]]))
+    return attach(matches[3], matches[4], pick(p.ost['-'+matches[5]]))
+  if (pick(p.re[matches[1]+'-']))
+    return attach(matches[3], matches[2], pick(p.re[matches[1]+'-']))
+  return false
 }
 
-function fitWord(w, l) {
+function fitWord(w, l, unattestedp) {
   const capitalized = /^[A-Z]/.test(w)
 
   const upcase = s => (capitalized && s) ? s[0].toUpperCase() + s.slice(1) : s
-  const pick = e => e && randElem(e)
-  const ty = (r, e = '') => {
+  const pick = e => {
+    if (!e || (unattestedp && !e.attested)) return false
+    return randElem(unattestedp ? e.attested.concat(e.unattested) : e.attested)
+  }
+  const fix = (r, e = '') => {
     const m = r.exec(w)
     if (!m) return m
     const pickee = pick(l[m[1]+e])
@@ -145,26 +153,26 @@ function fitWord(w, l) {
   w = w.toLowerCase()
   return upcase(
     pick(l[w])
-      || ty(/(.*?)((?:it)?y|[sdnr])$/)
-      || ty(/(.*?)(ly|ing|e(?:st?|d|n|rs?))$/)
-      || ty(/(.*?)(ly|ing|e(?:st?|d|n|rs?))$/,'e')
-      || ty(/(.*?)(ie[srd])$/,'y')
-      || fitsuffix(w, prepostfixList(l)))
+      || fix(/(.*?)((?:it)?y|[sdnr])$/)
+      || fix(/(.*?)(ly|ing|e(?:st?|d|n|rs?))$/)
+      || fix(/(.*?)(ly|ing|e(?:st?|d|n|rs?))$/,'e')
+      || fix(/(.*?)(ie[srd])$/,'y')
+      || fitsuffix(w, prepostfixList(l), unattestedp))
 }
 
-function eng2ang(word, lst) {
+function eng2ang(word, lst, unattestedp) {
   const w = (/(\W*)(\w+)(.*)/).exec(word)
   if (!w)
     return word
   else {
-    const m = fitWord(w[2], lst)
+    const m = fitWord(w[2], lst, unattestedp)
     return m ? w[1]+m+w[3] : word
   }
 }
 
-function anglify(p, lst) {
-  return p.split('\n')
-    .map(s => s.split(' ').map(w => eng2ang(w, lst)).join(' '))
+function anglify(input, wordlist, unattestedp) {
+  return input.split('\n')
+    .map(s => s.split(' ').map(word => eng2ang(word, wordlist, unattestedp)).join(' '))
     .join('\n')
     .replace(/(\w)(?:- | -)(\w)/g, '$1$2') // ere- blah/blah -lore
 }

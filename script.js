@@ -15,11 +15,9 @@ fetch('./wordbook.json')
         { name:'unattested', weight: 0.3 },
       ]
     })
-    anglish.list = fmtList(json)
+    anglish.list = formatList(json)
   })
   .catch(console.error)
-
-const tr = str => anglify(str, anglish.list)
 
 function escapeHTML(str) {
   const esc = {
@@ -69,6 +67,7 @@ var app = new Vue({
   data: {
     highlightp: true,
     ligaturep: false,
+    unattestedp: false,
     pagination: 1,
     search_results: [],
     input_text: '',
@@ -86,7 +85,7 @@ var app = new Vue({
         '---': '—',
         '--': '–',
       }
-      const out = tr(this.input_text).trim()
+      const out = anglify(this.input_text, anglish.list, this.unattestedp).trim()
             .replace(new RegExp(Object.keys(quote).join('|'), 'g'), s => quote[s])
       return this.ligaturep ? ligatures(out) : out
     },
